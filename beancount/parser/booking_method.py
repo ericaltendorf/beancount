@@ -383,11 +383,21 @@ def booking_method_HIFO_XFER_AWARE(entry, posting, matches):
     # If the posting is on a trading account, then it's probably a transfer to a
     # wallet and we want the inverse -- to stash away the lots least desirable
     # to sell.
+    is_sale = posting.price is not None
     sale_prep = "Wallet" in posting.account  # Total hack
-    if sale_prep:
+    if is_sale:
+        return booking_method_HIFO(entry, posting, matches)
+    elif entry.date.year < 2022:
+        return booking_method_HIFO(entry, posting, matches)
+    elif sale_prep:
         return booking_method_HIFO(entry, posting, matches)
     else:
         return booking_method_LowIFO(entry, posting, matches)
+
+def booking_method_magicbeans_stub(entry, posting, matches):
+    """Magicbeans booking method stub."""
+    raise NotImplementedError("Magicbeans booking method should be redefined by Magicbeans package")
+
 
 _BOOKING_METHODS = {
     Booking.STRICT: booking_method_STRICT,
@@ -399,4 +409,5 @@ _BOOKING_METHODS = {
     Booking.HIFO_XFER_AWARE: booking_method_HIFO_XFER_AWARE,
     Booking.NONE: booking_method_NONE,
     Booking.AVERAGE: booking_method_AVERAGE,
+    Booking.MAGICBEANS: booking_method_magicbeans_stub,  # Should be redefined by Magicbeans package
 }
